@@ -1,0 +1,42 @@
+FH Carrier I2C ILA build-flow correction - 2026-09-19
+
+Changes:
+- Unique design_1.bd lookup; reset_target all; generate_target all -force.
+- export_ip_user_files -of_objects BD -no_script -sync -force, without -quiet.
+- Preserve maintained wrapper and implementation hook; update both compile orders.
+- Reset implementation, design_1 OOC synthesis runs, and top synthesis only after preparation.
+- Removed invalid save_project command.
+- Check synthesis/write_bitstream STATUS and PROGRESS; export fresh LTX and check outputs.
+- Avoid unnecessary file normalize on project paths (Windows Documents alias issue).
+
+Validation completed:
+- Tcl syntax completeness for both scripts and original insertion hook.
+- Nine mock-command flow scenarios passed: repeat success, reset/generation/export
+  failures, absent/ambiguous BD, wait failure and unsuccessful synthesis status.
+  These tests verify control flow; they do not simulate FPGA hardware.
+- Commands/options checked against AMD UG835 2025.2.
+- Actual Vivado 2025.2 build 6299465: reset_target/generate_target completed;
+  generation completion logged for SmartConnect, System ILA and the parent BD.
+
+Actual build validation LIMIT:
+- Local Tcl Store initializer failed at project open (Common 17-539).
+  Validation harness alone continued past that specific environment failure.
+- IP export then failed because local Tcl path handling removed Documents from
+  the project path and attempted an inaccessible directory under the user profile
+  (export_ip_user_files-Tcl-12). The corrected flow propagated this error and
+  stopped before resetting/running synthesis. No suppression is in delivered scripts.
+- Full synthesis, implementation, bitstream, timing and hardware operation are
+  NOT validated. No new BIT/LTX is supplied. Run BUILD from a short extraction
+  path such as C:/Projects/VIVADO/FH_I2C_FIXED in the normal Vivado environment.
+- The validation copy and its regenerated files are NOT included in this package.
+
+AMD command references:
+https://docs.amd.com/r/en-US/Vivado-Design-Suite-Tcl-Command-Reference-Guide-UG835/generate_target
+https://docs.amd.com/r/en-US/ug835-vivado-tcl-commands/export_ip_user_files
+
+
+Original ZIP comparison: 414 files byte-identical (SHA-256).
+Changed files: README_I2C_LOGIC_ANALYZER.txt, BUILD_I2C_LOGIC_ANALYZER.tcl, SETUP_I2C_LOGIC_ANALYZER.tcl, STATIC_CONSISTENCY_REPORT.txt.
+No original files removed. BD, wrapper, XDC, raw I2C hook and System ILA files preserved.
+XPR XML parsed; every explicit source-file reference resolves.
+

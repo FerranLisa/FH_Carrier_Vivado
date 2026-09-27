@@ -1,0 +1,29 @@
+FH_Carrier Vivado I2C ILA - static consistency validation
+====================================================
+
+FH_Carrier_Bringup.srcs/sources_1/bd/design_1/design_1.bd: UNCHANGED
+FH_Carrier_Bringup.srcs/constrs_1/new/FH_Carrier_Bringup.xdc: UNCHANGED
+FH_Carrier_Bringup.srcs/sources_1/bd/design_1/ip/design_1_system_ila_0_0/design_1_system_ila_0_0.xci: UNCHANGED
+FH_Carrier_Bringup.srcs/sources_1/bd/design_1/ip/design_1_axi_iic_0_0/design_1_axi_iic_0_0.xci: UNCHANGED
+AXI IIC address: 0x00A0000000
+AXI IIC range: 64K
+System ILA slots: 2
+manual wrapper referenced: True
+generated wrapper referenced: False
+hook referenced in utils: True
+old incremental DCP referenced: False
+MARK_DEBUG PAC1944_I2C_scl_i: True
+MARK_DEBUG PAC1944_I2C_scl_o: True
+MARK_DEBUG PAC1944_I2C_scl_t: True
+MARK_DEBUG PAC1944_I2C_sda_i: True
+MARK_DEBUG PAC1944_I2C_sda_o: True
+MARK_DEBUG PAC1944_I2C_sda_t: True
+SCL D2: True
+SDA C2: True
+raw ILA depth 65536: True
+raw ILA 6 probes: True
+clock 100 MHz property: True
+old HW Manager cache removed: True
+old runs removed: True
+
+Historical checks above are retained from the original package. See VALIDATION_REPORT.txt for this correction and its validation limits.
