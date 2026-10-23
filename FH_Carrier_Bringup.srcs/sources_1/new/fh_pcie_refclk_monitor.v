@@ -28,6 +28,11 @@
  *   bit 1 = clock present
  *   bit 2 = frequency within +/-1 % (495000..505000 counts/10 ms)
  *
+ * Revision trace:
+ *   FH-2 2026-10-02: CDC cleanup. Local counter/measurement state now uses
+ *       synchronized local resets only, and the Gray counter crosses with
+ *       xpm_cdc_array_single instead of a hand-coded bus synchronizer.
+ *
  * NOTE:
  *   This block is intended for the bring-up image. If a PCIe IP core is later
  *   added, do not instantiate a second IBUFDS_GTE4 on the same MGTREFCLK pins.
@@ -117,10 +122,8 @@ module fh_pcie_refclk_monitor #(
      */
     reg [31:0] pcie_count_bin;
 
-    always @(posedge pcie_clk_50m or negedge sys_resetn) begin
-        if (!sys_resetn)
-            pcie_count_bin <= 32'd0;
-        else if (!rst50n)
+    always @(posedge pcie_clk_50m) begin
+        if (!rst50n)
             pcie_count_bin <= 32'd0;
         else
             pcie_count_bin <= pcie_count_bin + 32'd1;
@@ -132,24 +135,22 @@ module fh_pcie_refclk_monitor #(
      */
     wire [31:0] pcie_count_gray = pcie_count_bin ^ (pcie_count_bin >> 1);
 
-    (* ASYNC_REG = "TRUE", SHREG_EXTRACT = "NO" *)
-    reg [31:0] gray_sync_ff1;
+    wire [31:0] pcie_count_gray_sync;
 
-    (* ASYNC_REG = "TRUE", SHREG_EXTRACT = "NO" *)
-    reg [31:0] gray_sync_ff2;
-
-    always @(posedge clk_100m or negedge sys_resetn) begin
-        if (!sys_resetn) begin
-            gray_sync_ff1 <= 32'd0;
-            gray_sync_ff2 <= 32'd0;
-        end else if (!rst100n) begin
-            gray_sync_ff1 <= 32'd0;
-            gray_sync_ff2 <= 32'd0;
-        end else begin
-            gray_sync_ff1 <= pcie_count_gray;
-            gray_sync_ff2 <= gray_sync_ff1;
-        end
-    end
+    // Dedicated AMD CDC primitive.  The source is registered internally and
+    // the Gray bus is synchronized bitwise into clk_100m.
+    xpm_cdc_array_single #(
+        .DEST_SYNC_FF   (2),
+        .INIT_SYNC_FF   (0),
+        .SIM_ASSERT_CHK (0),
+        .SRC_INPUT_REG  (1),
+        .WIDTH          (32)
+    ) u_pcie_gray_cdc (
+        .src_clk  (pcie_clk_50m),
+        .src_in   (pcie_count_gray),
+        .dest_clk (clk_100m),
+        .dest_out (pcie_count_gray_sync)
+    );
 
     function automatic [31:0] gray_to_bin;
         input [31:0] gray;
@@ -161,7 +162,7 @@ module fh_pcie_refclk_monitor #(
         end
     endfunction
 
-    wire [31:0] pcie_count_sync_bin = gray_to_bin(gray_sync_ff2);
+    wire [31:0] pcie_count_sync_bin = gray_to_bin(pcie_count_gray_sync);
 
     reg [31:0] previous_count;
     reg [31:0] window_counter;
@@ -174,15 +175,8 @@ module fh_pcie_refclk_monitor #(
     /*
      * 10 ms measurement window in the 100 MHz system-clock domain.
      */
-    always @(posedge clk_100m or negedge sys_resetn) begin
-        if (!sys_resetn) begin
-            previous_count       <= 32'd0;
-            window_counter       <= 32'd0;
-            clkmon_count_10ms    <= 32'd0;
-            sample_valid         <= 1'b0;
-            clock_present        <= 1'b0;
-            frequency_in_range   <= 1'b0;
-        end else if (!rst100n) begin
+    always @(posedge clk_100m) begin
+        if (!rst100n) begin
             previous_count       <= 32'd0;
             window_counter       <= 32'd0;
             clkmon_count_10ms    <= 32'd0;

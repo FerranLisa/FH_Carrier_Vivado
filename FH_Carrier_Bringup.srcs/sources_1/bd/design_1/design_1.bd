@@ -1,7 +1,7 @@
 {
   "design": {
     "design_info": {
-      "boundary_crc": "0x2CA2A3A81160243B",
+      "boundary_crc": "0xC94068BAE0F09A22",
       "device": "xczu7ev-ffvc1156-2-i",
       "gen_directory": "../../../../FH_Carrier_Bringup.gen/sources_1/bd/design_1",
       "name": "design_1",
@@ -39,7 +39,7 @@
           "TRI_O": {
             "physical_name": "GMX_A_CTRL_tri_o",
             "direction": "O",
-            "left": "8",
+            "left": "14",
             "right": "0"
           }
         }
@@ -58,7 +58,7 @@
           "TRI_I": {
             "physical_name": "GMX_A_STATUS_tri_i",
             "direction": "I",
-            "left": "0",
+            "left": "31",
             "right": "0"
           }
         }
@@ -3578,10 +3578,10 @@
             "value": "0x00000008"
           },
           "C_GPIO2_WIDTH": {
-            "value": "1"
+            "value": "32"
           },
           "C_GPIO_WIDTH": {
-            "value": "9"
+            "value": "15"
           },
           "C_IS_DUAL": {
             "value": "1"
@@ -3705,8 +3705,8 @@
         "ports": [
           "proc_sys_reset_0/peripheral_aresetn",
           "axi_smc/aresetn",
-          "fh_pcie_refclk_monit_0/sys_resetn",
           "ila_0/probe8",
+          "fh_pcie_refclk_monit_0/sys_resetn",
           "axi_gpio_gmax_a_ctrl/s_axi_aresetn"
         ]
       },
@@ -3767,10 +3767,10 @@
           "axi_gpio_clkmon/s_axi_aclk",
           "axi_smc/aclk",
           "zynq_ultra_ps_e_0/maxihpm0_fpd_aclk",
-          "fh_pcie_refclk_monit_0/clk_100m",
           "system_ila_0/clk",
-          "axi_gpio_gmax_a_ctrl/s_axi_aclk",
-          "axi_iic_gmax_a/s_axi_aclk"
+          "axi_iic_gmax_a/s_axi_aclk",
+          "fh_pcie_refclk_monit_0/clk_100m",
+          "axi_gpio_gmax_a_ctrl/s_axi_aclk"
         ]
       },
       "zynq_ultra_ps_e_0_pl_resetn0": {
