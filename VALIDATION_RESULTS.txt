@@ -1,0 +1,53 @@
+VIVADO 2025.2 VALIDATION — 2026-10-03
+
+Fresh top-level synthesis: PASS, 0 errors, 0 critical warnings.
+Fresh implementation through route_design: PASS.
+The first implementation attempt hit the Windows debug-hub path-length limit.
+The same copy was mapped temporarily to R: and implementation was reset and
+rerun successfully. No RTL changes were made to resolve that environment issue.
+
+                             Original routed DCP     Fresh corrected route
+Setup WNS                    -0.601 ns                +0.036 ns
+Setup TNS                    -135.915 ns               0.000 ns
+Failing setup endpoints        315                       0
+Hold WHS                     +0.002 ns                +0.010 ns
+Hold THS                       0.000 ns                0.000 ns
+Pulse-width WPWS             +0.067 ns                +0.067 ns
+Failing hold/pulse endpoints     0 / 0                   0 / 0
+
+Bus skew: all 52 reported constraints pass; minimum slack +5.993 ns.
+The 48 new receiver constraints cover 32 Gray pointer buses and 16 IDELAY
+data/load buses. The other four belong to existing debug IP.
+
+Netlist identity: both rebuilt synthesis and routing contain exactly two
+u_xpm_cdc_debug_freeze stages and no debug_freeze_sync_reg cells.
+Verified 224 first-stage receiver control pins, all 32 six-bit Gray pointer
+crossings, all 16 IDELAY data/load crossings and the pixel-clock family.
+The freeze crossing is CDC-3 (Info), depth 2, with a timing exception.
+
+Methodology: 0 errors/critical warnings. TIMING-6, TIMING-7 and TIMING-28
+from the original route are gone. Remaining: 21 LUTAR-1 and 4 XDCB-5 warnings.
+DRC: 0 errors/critical warnings; 3 PDCN-1569 and 1 RTSTAT-10 warnings remain.
+
+FULL CDC IS NOT A CLEAN SIGN-OFF
+Critical: CDC-1=2, CDC-10=12, CDC-11=16, CDC-13=18 (48 total).
+Warnings: CDC-6=41, CDC-15=100. Info: CDC-3=111, CDC-9=8.
+The eight additional CDC-11 rows versus the original report are the even-lane
+copies of the existing bit-width synchronizers, now covered by explicit CDC
+exceptions. No new RTL or duplicate freeze chain was introduced.
+These findings, stable-source software assumptions, FIFO reset requirements
+and trained input timing exclusions are described in AUDIT_REPORT.txt.
+No blanket CDC waivers were introduced and no hardware regression was run.
+
+AUTHORITATIVE OUTPUTS
+results/20261003_202301/timing.rpt and timing.rpx
+results/20261003_202301/cdc.rpt
+results/20261003_202301/bus_skew.rpt
+results/20261003_202301/check_timing.rpt
+results/20261003_202301/methodology.rpt and drc.rpt
+results/20261003_202301/routed.dcp and effective.xdc
+results/20261003_202301/synth_identity.txt and routed_identity.txt
+
+The setup/hold margins are small and apply to this routed checkpoint and the
+retained timing assumptions. Regenerate and inspect reports after any change.
+This package is a timing-verified diagnostic project, not hardware sign-off.

@@ -1,0 +1,11 @@
+V16.3 PROJECT CORRECTIONS — 2026-10-03
+
+- Confirmed the old synchronizer was in a stale RPX, not either current checkpoint.
+- Fixed incomplete GMAX clock groups by including all generated descendants.
+- Added narrow first-stage exceptions for existing receiver control synchronizers.
+- Constrained custom FIFO RAM data transfer and Gray-pointer/IDELAY bus skew.
+- Preserved receiver RTL, firmware, BD/IP sources, pinout and electrical settings.
+- Added a reproducible rebuild with netlist identity checks and timestamped reports.
+
+See VALIDATION_RESULTS.txt for measured results, AUDIT_REPORT.txt for evidence
+and remaining CDC findings, and REBUILD_STEPS.txt for exact commands.

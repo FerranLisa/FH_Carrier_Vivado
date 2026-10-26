@@ -1,0 +1,19 @@
+FH_Carrier_Bringup RX ILA - 2026-10-04 - diagnostic build
+
+- Isolated debug project at R:/RX_ILA, copied from corrected V16.3 baseline.
+- Added ila_rx_d0: D0 pre-packing samples, local/global reset, bitslip,
+  packing, IDELAY and FIFO write probes, sampled by CLK0 /4 (150 MHz).
+- Added ila_rx_d1: matching D1 probes, sampled by CLK1 /4 (150 MHz).
+- Added ila_rx_words: D0/D1 FIFO outputs, reconstructed words, read pointers,
+  read/empty/reset signals and training state, sampled by CLK0 /5 (120 MHz).
+- New cores: 2048 samples; two input pipeline stages; passive probes only.
+- Debug hub explicitly uses PS pl_clk0 (100 MHz), independent of sensor clocks.
+- Added reproducible insertion/build scripts, exact probe map, immediate
+  capture helper and step-by-step BringupTest/Vivado acquisition guide.
+- Existing functional RTL, board pinout/electrical constraints, V16.3 XPM CDC,
+  receiver timing/Gray-pointer skew constraints, block design/address map,
+  Table-16 software and existing I2C/AXI debug cores are preserved.
+
+See VALIDATION_RX_ILA.txt for measured timing, CDC, DRC and source-hash checks.
+This build adds visibility; it does not claim to fix failed sensor training
+or validate frame capture. No board programming or hardware capture performed.

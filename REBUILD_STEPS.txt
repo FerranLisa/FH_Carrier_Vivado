@@ -1,0 +1,37 @@
+EXACT REBUILD — Vivado 2025.2
+
+1. Extract the project ZIP to a short writable path, for example
+   C:/Projects/VIVADO/FH_V16_3_review. Do not extract over your validated project.
+2. Close any Vivado session that has this extracted copy open.
+3. Open a Vivado 2025.2 command prompt and change to the extracted project folder.
+4. Run:
+   vivado -mode batch -source REBUILD_V16_3.tcl -log rebuild.log -journal rebuild.jou
+   This resets and rebuilds top-level synthesis and implementation, retains
+   generated IP checkpoints, and verifies the freeze synchronizer twice.
+   To also reset the project's IP synthesis runs, use:
+   vivado -mode batch -source REBUILD_V16_3.tcl -tclargs full
+5. Read results/YYYYMMDD_HHMMSS/timing.rpt, bus_skew.rpt, cdc.rpt,
+   methodology.rpt, drc.rpt and check_timing.rpt. Use that same folder's
+   timing.rpx for GUI inspection. Old timing_*.rpx files are historical only.
+
+TO VIEW A FRESH REPORT IN THE GUI
+Open the extracted FH_Carrier_Bringup.xpr, then enter:
+   open_run impl_1
+   report_timing_summary -report_unconstrained -max_paths 10 -name V16_3_fresh
+Generate a new report after opening the run. Reopening or exporting an existing
+report tab does not rerun timing analysis.
+
+BITSTREAM/XSA (AFTER REVIEWING THE REPORTS)
+Open the extracted .xpr in Vivado, then after a successful rebuild:
+   launch_runs impl_1 -to_step write_bitstream -jobs 4
+   wait_on_run impl_1
+   open_run impl_1
+   write_hw_platform -fixed -include_bit -force -file FH_Carrier_Bringup_V16_3.xsa
+Use the newly generated BIT/LTX/XSA together. Old exported XSAs in the baseline
+archive are not outputs of this rebuild. No hardware programming is automated.
+
+HARDWARE REGRESSION
+Repeat the established power/reset/clock sequence, 16-lane training, D0/D1
+candidate readout and raw-activity checks. Verify freeze prevents retries after
+an in-flight attempt completes and release resumes retries. Recheck the existing
+I2C/ILA and other bring-up functions before replacing the validated image.

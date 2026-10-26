@@ -2,6 +2,22 @@
 
 module FH_Carrier_Bringup_top
 (
+    input wire  c0_sys_clk_p,
+    input wire  c0_sys_clk_n,
+    output wire  c0_ddr4_act_n,
+    output wire [16:0] c0_ddr4_adr,
+    output wire [1:0] c0_ddr4_ba,
+    output wire [0:0] c0_ddr4_bg,
+    output wire [0:0] c0_ddr4_cke,
+    output wire [0:0] c0_ddr4_odt,
+    output wire [0:0] c0_ddr4_cs_n,
+    output wire [0:0] c0_ddr4_ck_t,
+    output wire [0:0] c0_ddr4_ck_c,
+    output wire  c0_ddr4_reset_n,
+    inout wire [7:0] c0_ddr4_dm_dbi_n,
+    inout wire [63:0] c0_ddr4_dq,
+    inout wire [7:0] c0_ddr4_dqs_c,
+    inout wire [7:0] c0_ddr4_dqs_t,
     // ============================================================
     // Existing FH_Carrier interfaces
     // ============================================================
@@ -155,6 +171,26 @@ module FH_Carrier_Bringup_top
 
     design_1_wrapper u_design_1_wrapper
     (
+        .c0_sys_clk_clk_p(c0_sys_clk_p),
+        .c0_sys_clk_clk_n(c0_sys_clk_n),
+        .c0_ddr4_act_n(c0_ddr4_act_n),
+        .c0_ddr4_adr(c0_ddr4_adr),
+        .c0_ddr4_ba(c0_ddr4_ba),
+        .c0_ddr4_bg(c0_ddr4_bg),
+        .c0_ddr4_cke(c0_ddr4_cke),
+        .c0_ddr4_odt(c0_ddr4_odt),
+        .c0_ddr4_cs_n(c0_ddr4_cs_n),
+        .c0_ddr4_ck_t(c0_ddr4_ck_t),
+        .c0_ddr4_ck_c(c0_ddr4_ck_c),
+        .c0_ddr4_reset_n(c0_ddr4_reset_n),
+        .c0_ddr4_dm_n(c0_ddr4_dm_dbi_n),
+        .c0_ddr4_dq(c0_ddr4_dq),
+        .c0_ddr4_dqs_c(c0_ddr4_dqs_c),
+        .c0_ddr4_dqs_t(c0_ddr4_dqs_t),
+        .capture_rx_clk          (gmax_a_pixel_clk),
+        .capture_rx_fval         (gmax_a_frame_valid),
+        .capture_rx_lval         (gmax_a_line_valid),
+        .capture_rx_data         (gmax_a_image_data),
         .GMX_A_CTRL_tri_o         (gmax_a_ctrl),
 
         .GMX_A_I2C_scl_io         (GMX_A_I2C_SCL),

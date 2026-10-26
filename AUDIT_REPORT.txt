@@ -1,0 +1,81 @@
+FH_Carrier_Bringup V16.3 project audit — 2026-10-03
+
+ROOT CAUSE
+timing_3.rpx and timing_4.rpx have identical SHA-256:
+DA1ED651CA7CEB4BF7E70DFE2A935E90C0D287634278D47CAC8E3D82AB2F254E
+Both contain a report generated at 19:39:19/20 on 2026-10-03 and the old
+debug_freeze_sync_reg names. The filename/file-save time is not the report's
+analysis time. The later synthesis checkpoint (19:46:14) and routed checkpoint
+(19:55:22) both contain u_xpm_cdc_debug_freeze with two stages, and no old
+debug_freeze_sync_reg cells. The evidence supports a stale saved report, not
+stale synthesis or implementation. It cannot identify the exact GUI action
+that caused the same old report to be exported twice.
+
+VERIFIED INPUTS
+Vivado 2025.2, build 6299465; xczu7ev-ffvc1156-2-i.
+The actual compile order includes FIFO_ICD_W12_D32_RDC.v, the generated
+design_1_wrapper.v, gmax3412_iob_clock.v, gmax3412_rx_adapter.v,
+iserdes1to10_12.v, training.v and FH_Carrier_Bringup_top.v, plus the BD/IP
+sources. See audit/compile_order.rpt for the full ordered list.
+Only one gmax3412_rx_adapter module definition is compiled. The extra wrapper
+under sources_1/new is not the compiled wrapper. Inactive reference modules
+are retained. No source selection or RTL replacement was needed.
+XPM_CDC is enabled. Vivado applied 106 XPM constraint files when opening the
+baseline synthesis design. The freeze XPM has DEST_SYNC_FF=2 and SRC_INPUT_REG=0;
+its source is the registered AXI GPIO output. training.v does not create a
+second freeze synchronizer. The five-bit selector has a separate XPM.
+
+CHANGES
+1. Implementation XDC selects clock families with -include_generated_clocks
+   from clk_pl_0, GMX_A_CLK0 and GMX_A_CLK1. The previous literal name
+   gmax_a_pixel_clk did not exist; the /5 clock was named u_training_n_1.
+   The inverted /4 descendants are now included as well. /4 and /5 from CLK0
+   remain related; their waveforms, dividers and common reset are unchanged.
+2. Narrow first-stage timing exceptions cover the existing lane control
+   synchronizers only. Later stages remain timed. The IDELAY bus and load
+   event have per-lane skew bounds to preserve the existing delayed capture.
+3. The existing custom asynchronous FIFO RAM data transfer has a 6.668 ns
+   datapath bound for the same-family /4-to-/5 crossing. This avoids requiring
+   new RAM data at the next unrelated phase edge: the read enable is gated by
+   the synchronized Gray write pointer and empty flag. Read-address paths and
+   ordinary read-domain logic remain timed. Cross-family paths retain the
+   existing asynchronous-clock-family intent.
+4. Add 6.668 ns skew bounds for each of the 32 six-bit FIFO Gray pointer
+   crossings. XPM_CDC_ARRAY_SINGLE supplies a false path, not a Gray-bus skew
+   bound. The pointer MSB is optimized into the corresponding binary MSB;
+   the constraints explicitly include that actual source register.
+5. Correct a stale clock-name comment in the main XDC. Preserve primary
+   clocks, I/O timing exceptions, pinout, electrical settings and PCIe rules.
+6. Add REBUILD_V16_3.tcl and endpoint checks. Rebuilds disable incremental reuse,
+   verify XPM identity after synthesis and routing, and create new timestamped
+   timing RPX/text, CDC, skew, clock, methodology, DRC and checkpoint outputs.
+
+PRESERVATION
+All 25 RTL/BD/XCI files under the original source tree match their copied
+versions by SHA-256: audit/source_preservation.json. Firmware is unchanged.
+The original project at C:/Projects/VIVADO/FH_Carrier_Bringup_Linux was not
+edited. The audit and rebuild operate on the separate delivered copy.
+
+LIMITS OF SIGN-OFF
+The original full CDC report has 40 critical findings: 18 CDC-13, 2 CDC-1,
+12 CDC-10 and 8 CDC-11. These are distinct from the resolved freeze issue.
+They include trained serial inputs, raw I2C ILA sampling, the combinational
+diagnostic readback mux, and replicated bit-width synchronizers. No blanket
+waivers have been added. See the new full CDC report for final counts.
+The selector protocol waits 10 us after changing index/lane; firmware waits
+20 ms after requesting freeze. Those software delays are not a hardware
+acknowledgement or a proof of bus coherence under arbitrary clock stoppage.
+The FIFO supports coordinated reset/flush; independent mid-stream reset of
+one pointer is not validated by static timing. Preserve the established reset
+sequence. Gray pointer reset is not a normal one-bit increment.
+The 16 serial inputs remain intentionally false-pathed for IDELAY training;
+static timing therefore does not certify board-level serial-eye margin.
+No board was programmed or exercised. Training, D0/D1 diagnostic readout,
+I2C and other validated board functions still require hardware regression.
+Frame/line-valid remain tied low, as in the original bring-up scope.
+
+REFERENCE
+AMD UG903, Creating Asynchronous Clock Groups:
+https://docs.amd.com/r/2023.1-English/ug903-vivado-using-constraints/Creating-Asynchronous-Clock-Groups
+Installed Vivado 2025.2 XPM constraints were also inspected directly under
+Vivado/data/ip/xpm/xpm_cdc/tcl (single, array_single, and gray).

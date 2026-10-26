@@ -1,0 +1,14 @@
+﻿[
+    {
+        "File":  "FH_Carrier_Bringup_GMAX3412_Scheduler.bit",
+        "SHA256":  "4066039D10E64F8CC9FCC3B3F406DF212C87170D31C178C48D9A41590E9F3B16"
+    },
+    {
+        "File":  "FH_Carrier_Bringup_GMAX3412_Scheduler.ltx",
+        "SHA256":  "187663A14DB0D88A6F78111DDD754DD65F36FCEE702AF2FCFC82F53E5A4813E6"
+    },
+    {
+        "File":  "FH_Carrier_Bringup_GMAX3412_Scheduler.xsa",
+        "SHA256":  "AFF888DA293F2614517F6808BFC143B6615B77A556334ED746176BF2C0CEBEC4"
+    }
+]

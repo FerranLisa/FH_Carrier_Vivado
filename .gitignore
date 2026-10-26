@@ -154,3 +154,51 @@ __pycache__/
 ###############################################################################
 
 !.gitkeep
+
+# Reproducible FPGA/software outputs (keep RTL, XDC, BD, XCI, XML and scripts).
+*.bit
+*.bin
+*.xsa
+*.ltx
+*.elf
+*.o
+*.obj
+*.a
+*.lib
+*.exe
+*.dll
+*.map
+*.rpt
+*.rpx
+*.vds
+*.bda
+*.html
+*.zip
+*.7z
+
+# Disposable build/review trees and archived superseded outputs.
+/results/
+/.srcs/
+/.tmpCRC/
+/.tmp_log_review/
+/-p/
+/stale_pre_i2c_ila_artifacts/
+/audit/baseline/
+/audit/build_logs/
+/audit/pl_ddr4/pre_dci/
+/audit/pl_ddr4/pre_aux_reset_fix/
+/audit/pl_ddr4/pre_v24/
+/audit/*_effective.xdc
+/audit/*_identity.txt
+/dfx_runtime.txt
+/clockInfo.txt
+/FinalUnmatchedCellsToUnplace.txt
+/tight_setup_hold_pins.txt
+/rx_debug_inventory.txt
+
+# Generated PS initialization and run markers; retain export documentation,
+# source/linker handoffs used by preparation scripts and release hashes.
+/exports/**/psu_init*.c
+/exports/**/psu_init*.h
+/exports/**/psu_init*.tcl
+/exports/**/BUILD_COMPLETE.txt

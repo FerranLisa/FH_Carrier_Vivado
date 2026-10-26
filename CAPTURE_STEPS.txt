@@ -1,0 +1,98 @@
+FH_Sen4K / GMAX3412-A receiver ILA build - V16.3 functional baseline
+
+Programming files (use this exact pair from the same build):
+  debug/FH_Carrier_Bringup_RX_ILA.bit
+  debug/FH_Carrier_Bringup_RX_ILA.ltx
+The XSA in debug/ contains this debug bitstream. The address map and functional
+sources are unchanged, so the existing V16 BringupTest ELF can be reused.
+If your Vitis launch automatically programs the FPGA, select this debug BIT
+there or disable automatic FPGA programming; do not overwrite it with the
+previous platform's bitstream. No BSP or application code change is required.
+
+1. If BringupTest is already running, use O in the GMAX submenu for graceful
+   sensor shutdown before reprogramming. With the sensor stopped, program
+   the debug BIT in Vivado Hardware Manager.
+   In Program Device, select the matching LTX as the Debug probes file.
+   Start the existing V16 BringupTest application through Vitis. If the PS
+   is not initialized, use the platform's normal PS initialization procedure.
+   Use the serial terminal at 115200 baud, 8 data bits, no parity, 1 stop bit,
+   no flow control. Application menu keys are single characters, no Enter.
+
+2. Main menu: 8 for the GMAX submenu. Run A to perform external power-up,
+   Table-16 upload, and internal power-up/PHY calibration. Check all reported
+   results pass and STREAM_EN remains 0. Run S and answer Y at its prompt.
+   Leave the sensor streaming even if training_result remains 0000.
+   Use T to record the training status. Do not run F unless training is FFFF.
+
+3. Refresh the hardware device in Vivado after the receiver clocks are active.
+   Expect ila_rx_d0, ila_rx_d1, ila_rx_words plus the existing I2C/AXI ILAs.
+   Select each receiver ILA and Run Trigger Immediate, depth 2048.
+   Alternatively, in Vivado's Tcl console:
+     source R:/RX_ILA/CAPTURE_RX_ILA.tcl
+   Change the path if you extracted the project elsewhere. The helper saves
+   all three waveforms as .ila and .csv under captures/<timestamp>/.
+
+4. Take at least two immediate capture sets, with several seconds between
+   them. Record the UART T and D output alongside them. D pauses retry only
+   while taking its software snapshot, then restores the previous freeze
+   setting; an ILA acquisition taken later is normally during automatic retry.
+
+5. Inspect D0 and D1 separately (2048 samples at nominal 150 MHz = 13.65 us):
+   - probe0 raw8: ISERDESE3 eight serial samples, before bitslip/packing.
+   - probe1 shifted8 and probe2 packed12: receiver packing outputs.
+   - probe3 write enable; probe4 combined lane reset; probe5 soft reset;
+     probe6 global reset; probe7 bitslip count; probe8 pack counter.
+   - probe9 bit-width mode; probe10 IDELAY value; probe11 IDELAY load;
+     probe12 write pointer; probe13 full; probe14 sticky raw activity;
+     probe15 bitslip pulse. See debug/probe_map_routed.tsv for the actual
+     Hardware Manager signal names; probe_map.tsv records insertion aliases.
+   In normal 10-bit operation the mode is 2, reset probes should usually be
+   low between reset pulses, and the packing cadence should run. A full FIFO
+   can legitimately stop write-pointer advancement if reads are stopped.
+
+6. Inspect ila_rx_words (2048 samples at nominal 120 MHz = 17.07 us):
+   probes0/1 D0/D1 reconstructed 12-bit words, probes2/3 FIFO outputs,
+   probe4 read enables and probe5 empty flags (bit0=D0, bit1=D1),
+   probes6/7 read pointers, probe8 read resets (bit0=D0, bit1=D1),
+   probe9 global reset, probe10 training result, probe11 training done,
+   probe12 current channel, probe13 alignment state, probes14/15 counters,
+   probe16 synchronized debug freeze.
+   Alignment-state values: 0 idle, 1 reset ISERDES, 2 load IDELAY,
+   3 eye check, 4 eye confirmation, 5 sample setting, 6 word alignment,
+   7 finish.
+   Compare the low ten word bits against the sensor readback TP=0x165.
+   During automatic alignment the data and IDELAY settings may vary.
+   A 17-us capture is shorter than a complete training attempt; a flat
+   training_done or unchanged channel in one capture is not proof of failure.
+
+7. For a reset-release capture, on ila_rx_d0 or ila_rx_d1 set probe4 lane_reset
+   trigger to a falling edge (1 -> 0), trigger position 1024, then Run Trigger.
+   Wait for an automatic retry to reset that lane. If it does not trigger,
+   use immediate capture and record its reset level. Avoid GPIO writes from
+   Vivado while BringupTest owns the control register.
+
+8. Send the three .csv/.ila files, corresponding T/D UART logs, and which
+   capture was immediate versus triggered. Then run O for graceful shutdown.
+
+Interpretation:
+- Raw8 all zero while the lane reset is low and its ILA acquires means the
+  active sampling clock sees zeros at that receiver. It does not distinguish
+  missing sensor data, cable/contact faults, or an input/timing problem alone.
+- Raw8 activity with persistent zero downstream words directs attention to
+  packing/reset/FIFO behavior; inspect enables, full/empty and pointers.
+- Alternating raw AA/55 and packed 2AA/155 differs from the configured 165
+  training pattern. The capture locates where the discrepancy first appears.
+- Sticky raw activity is historical since reset, not an instantaneous sample.
+- Each ILA adds two input pipeline cycles equally to all its probes. The three
+  captures have independent triggers; their sample indices are not aligned.
+- These are digital internal samples. They do not measure voltage, eye margin,
+  actual clock frequency, cable continuity, or replace an oscilloscope.
+
+Receiver clocks depend on the sensor output. Do not operate receiver ILAs
+after X/O stops those clocks. The debug hub uses PS pl_clk0 at 100 MHz;
+that PS clock must also be initialized and running. If detection fails,
+confirm PS initialization and sensor clocks, refresh, and use a lower JTAG
+clock (e.g. 10 MHz). AMD's clocking guidance:
+https://docs.amd.com/r/en-US/ug908-vivado-programming-debugging/Debug-Core-Clocks
+
+Hardware capture has not been performed by this build preparation.

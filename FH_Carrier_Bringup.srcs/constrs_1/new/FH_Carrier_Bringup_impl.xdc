@@ -2,9 +2,11 @@
 # Clock waveform, RTL, pins, electrical settings and PCIe constraints preserved.
 
 # V16.3 review: complete clock families and constrain the existing CDC circuits.
-# Include every descendant of each primary clock, including /5 and inverted /4.
+# Include the receiver descendants, including /5 and inverted /4. The 120 MHz
+# capture clock derived from clk_pl_0 is deliberately excluded from this broad
+# exception: its XPM FIFO/CDC constraints must retain their max-delay bounds.
 set_clock_groups -name FH_ASYNC_PL_GMAX_FAMILIES -asynchronous \
-    -group [get_clocks -include_generated_clocks clk_pl_0] \
+    -group [get_clocks clk_pl_0] \
     -group [get_clocks -include_generated_clocks GMX_A_CLK0] \
     -group [get_clocks -include_generated_clocks GMX_A_CLK1]
 
@@ -98,3 +100,8 @@ set_clock_groups -name FH_ASYNC_PL_PCIE_REFCLK_FAMILY -asynchronous \
 # Deassertion is synchronized by the following stage.  Exclude only that first
 # asynchronous CLR endpoint from recovery/removal timing.
 set_false_path -to [get_pins -hierarchical -regexp {.*fh_pcie_refclk_monit_0.*/rst50_sync_reg\[0\]/CLR}]
+
+# v24: DDR calibration crosses from the DDR UI clock into the 120 MHz scheduler.
+# Only the first ASYNC_REG stage is excepted; the second stage remains timed.
+set_false_path -to [get_pins -hier -regexp {.*gmax_pl_ring.*/calibrated_reg\[0\]/D}]
+set_false_path -to [get_pins -hier -regexp {.*pl_ddr_dci_reset.*/lock_sync_reg\[0\]/D}]

@@ -1,0 +1,59 @@
+FH_Carrier_Bringup RX ILA validation - 2026-10-04
+Vivado 2025.2, build 6299465; xczu7ev-ffvc1156-2-i
+Fresh top synthesis and full implementation, incremental reuse disabled.
+Final reports: results/20261004_100615/
+
+Routed timing:
+  Setup WNS +0.131 ns, TNS 0, failing endpoints 0.
+  Hold WHS +0.010 ns, THS 0, failing endpoints 0.
+  Pulse-width WPWS +0.067 ns, TPWS 0, failing endpoints 0.
+  All 52 bus-skew checks passed; minimum skew slack +5.994 ns.
+  All user specified timing constraints are met.
+
+Netlist/constraint identity:
+  Both V16.3 u_xpm_cdc_debug_freeze synchronizer stages present in fresh
+  synthesized and routed designs. No old debug_freeze_sync_reg cells.
+  Verified all 224 receiver first-stage constraint endpoints, all 16 IDELAY
+  bus/load crossings, all 32 six-bit Gray-pointer crossings, and the CLK0
+  generated pixel-clock family. Clock0 /4 and /5 remain related; separate
+  primary clock families retain their baseline asynchronous clock grouping.
+
+DRC/methodology:
+  No errors or critical warnings.
+  DRC retains 4 warnings: PDCN-1569 x3, RTSTAT-10 x1.
+  Methodology has 32 warnings: LUTAR-1 x21, TIMING-9 x1, XDCB-5 x10.
+  See the detailed reports for affected cells and descriptions.
+
+CDC is not clean:
+  Critical: CDC-1 x2, CDC-10 x12, CDC-11 x16, CDC-13 x18 = 48 total.
+  This matches the baseline IDs and destinations. Five CDC-10 source-bit
+  representatives differ within the same selector bus feeding the same
+  GPIO status synchronizers; they are not new receiver ILA crossings.
+  Warning: CDC-6 x47, CDC-15 x196 = 243 total (baseline 141).
+  The 102 additional warning rows involve the new ILA/debug hub transport.
+  Info: CDC-3 x208, CDC-9 x8. No blanket waivers were introduced.
+  See cdc.rpt and cdc_comparison.txt. This is diagnostic validation, not
+  an assertion of complete CDC safety or external Sub-LVDS eye margin.
+
+Functional preservation:
+  All 32 baseline files under FH_Carrier_Bringup.srcs are hash-checked against
+  the corrected V16.3 source manifest. No functional RTL, XDC pinout/timing,
+  BD, XCI or BringupTest software edits were needed for the added probes.
+  Debug insertion is an implementation Tcl hook; existing I2C/AXI ILAs remain.
+  Three receiver cores have 2048 samples and two input pipeline stages.
+  D0: CLK0 /4, D1: CLK1 /4; word/training: CLK0 /5. The debug hub uses the
+  initialized PS pl_clk0 at 100 MHz. Routed UUID/clock/width confirmation is
+  saved in debug/routed_debug_identity.txt.
+
+Programming outputs:
+  BIT and LTX are generated from this same routed design; XSA contains the
+  debug bitstream. SHA256SUMS.txt records the delivered file identities.
+  debug/BUILD_COMPLETE.txt confirms the build finished successfully.
+  Existing V16 BringupTest ELF is compatible with the preserved address map.
+  The embedded BIT in the XSA was compared byte-for-byte to the delivered
+  BIT. All 49 physical receiver probe-port widths and bit ranges were checked
+  against the routed LTX. See debug/ARTIFACT_CHECKS.txt.
+
+No hardware programming, ILA acquisition, training pass, frame capture, analog
+signal-quality measurement or cable-continuity test was performed here.
+Follow CAPTURE_STEPS.txt to obtain the next diagnostic evidence.

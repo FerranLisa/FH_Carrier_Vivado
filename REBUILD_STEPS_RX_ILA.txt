@@ -1,0 +1,33 @@
+FH_Carrier_Bringup receiver ILA project - Vivado 2025.2
+
+Current local build: R:/RX_ILA/FH_Carrier_Bringup.xpr
+R: keeps its existing mapping to the V16.3 review folder. The baseline project
+at R:/FH_Carrier_Bringup.xpr is preserved; the debug build lives in its child.
+
+To reproduce after downloading the ZIP:
+1. Extract the complete project to a short path such as C:/Projects/FH_RX_ILA.
+2. From a Vivado 2025.2 Tcl console with no project/design open, run:
+     source C:/Projects/FH_RX_ILA/BUILD_RX_ILA.tcl
+   Or use the Vivado 2025.2 command prompt:
+     vivado -mode batch -source C:/Projects/FH_RX_ILA/BUILD_RX_ILA.tcl
+3. The script reassigns its implementation insertion hook to this extraction
+   path, resets synth_1/impl_1, disables incremental reuse, synthesizes,
+   inserts three receiver ILAs after init_design, and routes from scratch.
+   Existing generated-IP synthesis outputs are reusable. To reset those too:
+     vivado -mode batch -source C:/Projects/FH_RX_ILA/BUILD_RX_ILA.tcl -tclargs full
+4. Reports/checkpoint go into results/<timestamp>/. The script checks V16.3
+   XPM identity, receiver CDC-constraint endpoints, setup, hold, pulse width,
+   bus skew and DRC before generating the programming outputs in debug/.
+   CDC findings are reported for review, not suppressed to obtain a pass.
+5. Success creates debug/BUILD_COMPLETE.txt plus a BIT, matching LTX and XSA.
+   If the build stops on timing or DRC, inspect the new reports; do not use
+   any older files left in debug/ as evidence of the failed build's success.
+6. Follow CAPTURE_STEPS.txt. Program the exact BIT/LTX pair. Existing V16
+   BringupTest ELF is compatible; ensure its Vitis launch uses this BIT.
+
+ILA insertion is implemented by insert_receiver_ila.tcl, saved as the
+implementation INIT_DESIGN post-hook in the XPR. Probes have depth 2048,
+two input pipeline stages and simple data/trigger capability. No source RTL
+or block-design edit is needed. The existing I2C and AXI ILAs are retained.
+Do not add debug probes directly to asynchronous raw buses in another clock
+domain, or add false-path constraints to hide failing debug timing.

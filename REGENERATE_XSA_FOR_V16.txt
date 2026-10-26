@@ -1,0 +1,4 @@
+The included FH_Carrier_Bringup_top_PRE_V16_STALE.xsa is the pre-V16 hardware export from the uploaded project.
+It is retained only as a reference and MUST NOT be used to build the V16 Vitis platform.
+
+After Vivado synthesis/implementation/bitstream generation, export a new hardware platform including the bitstream and use that new V16 XSA in Vitis.
